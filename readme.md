@@ -4,6 +4,8 @@ This is a simple example to test Apache Doris compaction performance.
 ## How to use
 
 ### 1. Create Table
+#### Aggregate Model
+
 ```sql
 
 CREATE TABLE IF NOT EXISTS compaction_tbl
@@ -19,6 +21,45 @@ CREATE TABLE IF NOT EXISTS compaction_tbl
     `min_dwell_time` INT MIN DEFAULT "99999" COMMENT "用户最小停留时间"
 )
 AGGREGATE KEY(`user_id`, `date`, `city`, `age`, `sex`)
+DISTRIBUTED BY HASH(user_id) PROPERTIES("replication_num" = "1");
+
+```
+
+#### Unique Model
+
+```sql
+
+CREATE TABLE IF NOT EXISTS compaction_tbl
+(
+    `user_id` LARGEINT NOT NULL COMMENT "用户id",
+    `username` VARCHAR(50) NOT NULL COMMENT "用户昵称",
+    `city` VARCHAR(20) COMMENT "用户所在城市",
+    `age` SMALLINT COMMENT "用户年龄",
+    `sex` TINYINT COMMENT "用户性别",
+    `phone` LARGEINT COMMENT "用户电话",
+    `address` VARCHAR(500) COMMENT "用户地址",
+    `register_time` DATETIME COMMENT "用户注册时间"
+)
+UNIQUE KEY(`user_id`, `username`)
+DISTRIBUTED BY HASH(user_id) PROPERTIES("replication_num" = "1");
+
+```
+
+#### Duplicate Model
+
+```sql
+
+CREATE TABLE IF NOT EXISTS compaction_tbl
+(
+    `user_id` LARGEINT NOT NULL COMMENT "用户id",
+    `timestamp` DATETIME NOT NULL COMMENT "日志时间",
+    `type` INT NOT NULL COMMENT "日志类型",
+    `error_code` INT COMMENT "错误码",
+    `error_msg` VARCHAR(1024) COMMENT "错误详细信息",
+    `op_id` BIGINT COMMENT "负责人id",
+    `op_time` DATETIME COMMENT "处理时间"
+)
+DUPLICATE KEY(`user_id`, `timestamp`, `type`)
 DISTRIBUTED BY HASH(user_id) PROPERTIES("replication_num" = "1");
 
 ```
